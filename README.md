@@ -21,6 +21,7 @@ This project extracts structured data from historical Dutch art catalogues using
 - PyMuPDF (PDF to image)
 - Base64
 - Pandas
+- Openpyxl
 
 ---
 
