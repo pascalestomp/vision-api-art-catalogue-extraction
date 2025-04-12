@@ -1,0 +1,7 @@
+openai
+pandas
+pymupdf
+Pillow
+requests
+openpyxl
+paddleocr
