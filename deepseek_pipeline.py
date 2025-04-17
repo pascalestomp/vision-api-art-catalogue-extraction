@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 pip install pandas tqdm openai PyMuPDF
 
 import os
