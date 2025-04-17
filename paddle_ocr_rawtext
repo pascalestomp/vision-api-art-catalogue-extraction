@@ -6,6 +6,13 @@ pip install opencv-python
 pip install Pillow
 sudo apt-get install poppler-utils 
 
+import os
+import re
+from paddleocr import PaddleOCR
+from pdf2image import convert_from_path
+import cv2
+from PIL import Image
+
 
 # Initialize PaddleOCR with Dutch language (nl)
 ocr = PaddleOCR(use_angle_cls=True, lang="nl")  # Change language if needed
