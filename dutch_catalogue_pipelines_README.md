@@ -127,4 +127,4 @@ The generated Excel file will contain the following **structured columns**:
 ---
 
 ## 💖 Made by  
-Pascale, Yagmur, Marianiki, Ava RKD, and GPT-4.
+Pascale, Yagmur, Marianiki, Ava, RKD, GPT-4 & DeepSeek.
