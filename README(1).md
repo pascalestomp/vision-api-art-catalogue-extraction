@@ -127,11 +127,13 @@ deepseek_pipeline.py
 
 ### OCR + LLM Pipeline
 **OCR**
+
 2. Adjust file paths and run the script:
 ```
 paddle_ocr_rawtext
 ```
 **Structuring LLM**
+
 3. Mount your own API Key.
   
 4. Adjust script to own folder paths and preferred LLM Model (Deepseek or OpenAI)
