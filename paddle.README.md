@@ -11,20 +11,6 @@ This project contains a Python script that uses **PaddleOCR** to extract text fr
 
 ---
 
-## 🧩 Process Overview
-
-```mermaid
-flowchart LR
-  A[PDF File] --> B[pdf2image Conversion]
-  B --> C[Split Double Page]
-  C --> D[OpenCV Image Read]
-  D --> E[PaddleOCR Text Extraction]
-  E --> F[Merge + Organize Text]
-  F --> G[Save to .txt File]
-```
-
----
-
 
 ## 🔧 Requirements
 
@@ -40,7 +26,7 @@ pip install paddleocr paddlepaddle pdf2image opencv-python Pillow
 
 ## 📂 How to Use
 
-1. Add your PDF file (e.g., `catalogue.pdf`) to the project directory.
+1. Add your PDF file to the project directory.
 2. In your script, replace the `name.pdf` with the name of your file.
 3. Run the script:
 
