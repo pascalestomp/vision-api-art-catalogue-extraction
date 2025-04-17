@@ -25,16 +25,6 @@ flowchart LR
 
 ---
 
-## 📁 Repository Structure
-
-```
-/paddle_ocr_extractor.py      # Main script to run PaddleOCR on PDFs
-/pdf_pages/                   # Folder where page images are saved
-/output.txt                   # Final text output from OCR
-README.md                     # Project documentation (this file)
-```
-
----
 
 ## 🔧 Requirements
 
