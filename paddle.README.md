@@ -41,7 +41,7 @@ pip install paddleocr paddlepaddle pdf2image opencv-python Pillow
 ## 📂 How to Use
 
 1. Add your PDF file (e.g., `catalogue.pdf`) to the project directory.
-2. In your script, replace the `input_path` with the name of your file.
+2. In your script, replace the `name.pdf` with the name of your file.
 3. Run the script:
 
 ```bash
@@ -60,15 +60,7 @@ python paddle_ocr_extractor.py
 - Merges the text in reading order (Left → Right)
 - Saves the result as a plain `.txt` file
 
----
 
-## 📌 Notes
-
-- Works best with well-scanned, clear catalogues
-- Handwriting, blur, and stains may still affect OCR accuracy
-- No preprocessing is applied, but this can be added manually
-
----
 
 ## 👥 Authors
 
