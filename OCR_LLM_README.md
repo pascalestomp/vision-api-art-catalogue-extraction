@@ -9,6 +9,7 @@ and leveraging OpenAI’s GPT-4-turbo model to extract relevant metadata into a 
 1. **Text Input**:
    - The script begins by reading a `.txt` file containing OCR-extracted text from a scanned catalogue.
    - The file path is defined by `TEXT_FILE_PATH`.
+   - change the "file.txt" with your txt file
 
 2. **Chunking for API Compatibility**:
    - Because of token limitations in the OpenAI API, the raw text is split into manageable chunks 
@@ -42,24 +43,6 @@ and leveraging OpenAI’s GPT-4-turbo model to extract relevant metadata into a 
 - Price
 - Full Entry Quote
 
-⚠️ Known Limitations:
-- **Character confusion**: The OCR often misreads characters (e.g., lowercase “l”, uppercase “I”, and the number “1”), 
-  leading to errors in names and numbers.
-- **LLM misinterpretation**: Phrases like “idem” or “dezelfde” can be misunderstood by the LLM, resulting in missing or 
-  duplicated artist names.
-- **Formatting consistency**: GPT output may occasionally deviate from expected CSV formatting, which could cause row misalignment.
-- **Entity omission**: Not all entities are captured—especially in long catalogues—due to chunk boundaries or vague entry formatting.
-
-💡 Notes:
-- This approach is ideal for extracting structured data from historical text when the number of categories (columns) 
-  is relatively small.
-- When it comes to optimizing output quality, **prompt engineering** plays a critical role and should be treated 
-  as a flexible and evolving component of the pipeline.
-
-🚀 Dependencies:
-- `openai` – for accessing GPT-4
-- `pandas` – for data handling and Excel export
-- `openpyxl` – as the Excel writer engine for `.xlsx` output
 
 This script represents a hybrid approach where traditional OCR is combined with generative AI to tackle the 
 nuanced task of historical data structuring.
