@@ -1,0 +1,177 @@
+import os
+import re
+import textwrap
+from io import StringIO
+import openai
+import pandas as pd
+pip install tqdm 
+
+api_key = "Api_key"
+if not api_key:
+    raise ValueError("❌ OpenAI API key not found! Set it using 'export OPENAI_API_KEY=your-api-key'")
+  
+client = openai.OpenAI(api_key=api_key)
+
+# ✅ Path to the TXT file containing OCR-extracted text
+TEXT_FILE_PATH = "file.txt"
+
+
+# Define Excel columns
+COLUMNS = [
+    "Catalogue Identifier", "Keyword Person", "Artist City",
+    "Artist Address", "Entry Number", "Free Title",
+    "Additional Artwork Info", "Asterisk", "Amount Type",
+    "Currency", "Price", "Full Entry Quote"
+]
+
+
+def extract_catalogue_identifier(filename):
+    """Extracts the 9-digit catalogue identifier from the filename."""
+    match = re.search(r"(\d{9})", filename)
+    return match.group(1) if match else "UNKNOWN"
+
+
+def read_txt_file(txt_path):
+    """Reads extracted text from the specified .txt file."""
+    try:
+        with open(txt_path, "r", encoding="utf-8") as file:
+            return file.read().strip()
+    except Exception as e:
+        print(f"❌ Error reading file {txt_path}: {e}")
+        return ""
+
+
+def split_text_into_chunks(text, max_chunk_size=4000):
+    """Splits large text into smaller chunks for API processing."""
+    return textwrap.wrap(text, max_chunk_size, break_long_words=False, break_on_hyphens=False)
+
+
+def format_text_into_table(raw_text, txt_name):
+    """Formats extracted text into structured table using OpenAI."""
+    catalogue_identifier = extract_catalogue_identifier(txt_name)
+    text_chunks = split_text_into_chunks(raw_text)  # ✅ Break large text into smaller batches
+    extracted_dfs = []
+
+
+    for chunk_id, chunk_text in enumerate(text_chunks):
+        print(f"📦 Processing chunk {chunk_id + 1}/{len(text_chunks)}...")
+
+
+        try:
+            prompt = f"""Convert the following Dutch exhibition catalog text into a structured CSV table:
+
+
+            **Rules:**
+            - **Catalogue Identifier:** Use `{catalogue_identifier}` for every row.
+            - **Extract all entities from this chunk.**
+            - **Keyword Person:** Extract the full name of the artist, formatting it as:
+              - First Name/Initials, Infixes, Surname.
+              - Example:
+                - "VAN GOGH, J. H." → "J. H. Van Gogh"
+                - "Mevr. Adriana van Haanen" → Keep full title and name.
+                - "T. van der Grient" → Preserve infixes and initials.
+            - **Entry Number:** Extract correctly.
+              - If "unknown", assign it based on order.
+              - Example: "1,2,3, unknown,5" → Assign "4" to the unknown entry.
+            - **Include the full entry text exactly as it appears.**
+            - **Continue entity numbering sequentially across chunks.**
+            - **Do NOT stop at 65. Process all entries in this batch.**
+            - **Fill empty cells with `"unknown"`**
+
+
+            **Output Columns:**
+            {','.join(COLUMNS)}
+
+
+            **Extracted Text (Chunk {chunk_id + 1}/{len(text_chunks)}):**
+            {chunk_text}
+            """
+
+
+            response = client.chat.completions.create(
+                model="gpt-4-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a data formatting assistant. Output CSV data only."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.1,
+                max_tokens=4000
+            )
+
+
+            if response.choices[0].message.content:
+                formatted_data = response.choices[0].message.content.strip()
+                df = pd.read_csv(StringIO(formatted_data), delimiter=",", names=COLUMNS, quotechar='"', on_bad_lines="skip")
+                extracted_dfs.append(df)
+
+
+        except Exception as e:
+            print(f"❌ Error processing chunk {chunk_id + 1}: {e}")
+
+
+    # Combine all extracted data from chunks
+    if extracted_dfs:
+        final_df = pd.concat(extracted_dfs, ignore_index=True)
+        final_df = fix_missing_entry_numbers(final_df)  # ✅ Fix numbering issues
+        return final_df
+    return pd.DataFrame(columns=COLUMNS)
+
+
+def fix_missing_entry_numbers(df):
+    """Fills missing or 'unknown' entry numbers based on sequential order."""
+    df["Entry Number"] = pd.to_numeric(df["Entry Number"], errors='coerce')  # Convert to numbers
+    df = df.sort_values(by="Entry Number", na_position='last').reset_index(drop=True)
+
+
+    missing_indices = df[df["Entry Number"].isna()].index  # Find missing numbers
+    if not missing_indices.empty:
+        last_known = df["Entry Number"].dropna().astype(int).tolist()
+        all_possible = list(range(1, len(df) + 1))  # Expected sequence
+        missing_numbers = [num for num in all_possible if num not in last_known]
+
+
+        for idx, missing_num in zip(missing_indices, missing_numbers):
+            df.at[idx, "Entry Number"] = missing_num  # Fill in missing numbers
+
+
+    df["Entry Number"] = df["Entry Number"].astype(int)  # Ensure integer format
+    return df
+
+
+def process_txt_file(text_file_path):
+    """Processes the single extracted text file and converts it into structured data."""
+    extracted_data = []
+
+
+    print(f"\n📄 Processing TXT File: {text_file_path}")
+
+
+    # Read extracted text from .txt file
+    raw_text = read_txt_file(text_file_path)
+    if not raw_text:
+        print(f"⚠️ No text found in {text_file_path}")
+        return
+
+
+    # Format text into structured table
+    df_entries = format_text_into_table(raw_text, os.path.basename(text_file_path))
+    if not df_entries.empty:
+        extracted_data.append(df_entries)
+
+
+    # Combine all data into one DataFrame
+    final_df = pd.concat(extracted_data, ignore_index=True) if extracted_data else pd.DataFrame(columns=COLUMNS)
+
+
+    # Save extracted data to Excel
+    if not final_df.empty:
+        output_file = "chunked_paddle.xlsx"
+        final_df.to_excel(output_file, index=False)
+        print(f"\n✅ Extraction complete! Data saved to {output_file}")
+    else:
+        print("❌ No data extracted! Check API responses.")
+
+
+# Run the process
+if __name__ == "__main__":
+    process_txt_file(TEXT_FILE_PATH)
