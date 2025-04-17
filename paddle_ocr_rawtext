@@ -1,0 +1,104 @@
+from paddleocr import PaddleOCR
+pip install paddleocr
+pip install paddlepaddle  # required for PaddleOCR backend
+pip install pdf2image
+pip install opencv-python
+pip install Pillow
+sudo apt-get install poppler-utils 
+
+
+# Initialize PaddleOCR with Dutch language (nl)
+ocr = PaddleOCR(use_angle_cls=True, lang="nl")  # Change language if needed
+
+
+def split_double_page(image):
+    """Splits a double-page image into left and right halves."""
+    height, width, _ = image.shape
+    mid_x = width // 2
+
+
+    left_page = image[:, :mid_x]   # Left half
+    right_page = image[:, mid_x:]  # Right half
+
+
+    return left_page, right_page
+
+
+def process_image(image):
+    """Extract text from a single image."""
+    results = ocr.ocr(image, cls=True)
+    extracted_text = []
+
+
+    for res in results:
+        if res is not None:  
+            for line in res:
+                text = line[1][0]  # Extract detected text
+                extracted_text.append(text)
+
+
+    return "\n".join(extracted_text)
+
+
+def process_pdf(pdf_path, output_folder):
+    """Convert PDF pages to images, split double pages, and extract text from each half."""
+    os.makedirs(output_folder, exist_ok=True)
+    images = convert_from_path(pdf_path)
+    extracted_text = []
+
+
+    for i, image in enumerate(images):
+        image_path = os.path.join(output_folder, f"page_{i+1}.jpg")
+        image.save(image_path, "JPEG")
+
+
+        # Load image with OpenCV
+        img = cv2.imread(image_path)
+        if img is None:
+            print(f"Error loading image: {image_path}")
+            continue
+
+
+        # Split the image into two pages
+        left_page, right_page = split_double_page(img)
+
+
+        print(f"Processing page {i+1}: Left side...")
+        text_left = process_image(left_page)
+
+
+        print(f"Processing page {i+1}: Right side...")
+        text_right = process_image(right_page)
+
+
+        # Append in reading order (left first, then right)
+        extracted_text.append(f"\n=== Page {i+1} (Left) ===\n{text_left}")
+        extracted_text.append(f"\n=== Page {i+1} (Right) ===\n{text_right}")
+
+
+    return "\n".join(extracted_text)
+
+
+def main(input_path):
+    """Extract text from PDF with double-page spreads."""
+    output_text_file = f"{os.path.splitext(input_path)[0]}.txt"
+
+
+    if input_path.lower().endswith('.pdf'):
+        text = process_pdf(input_path, "pdf_pages")
+    else:
+        print("Unsupported file format. Please use PDF files.")
+        return
+
+
+    with open(output_text_file, "w", encoding="utf-8") as f:
+        f.write(text)
+    print(f"Extracted text saved to: {output_text_file}")
+
+
+# Place your PDF file path in the variable below
+if __name__ == "__main__":
+    input_path = "name.pdf"  # <-- Replace with your PDF file path
+    main(input_path)
+
+
