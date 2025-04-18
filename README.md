@@ -81,12 +81,15 @@ This project experimented with and provided three distinct methodologies for ext
 - Textwrap
 ---
 
-## 📁 Folder Structure [THIS NEEDS ADJUSTING]
+## 📁 Folder Structure
 
 vision-api-art-catalogue-extraction/  
-├── main.py → Python script to run the extraction  
+├── main.py → Python script to run the Vision extraction & structuring 
 ├── requirements.txt → List of Python packages  
-├── prompts/ → Prompt rules and notes  
+├── prompts/ → Prompt rules and notes 
+├── deepseek_pipeline.py → Python script to run deepseek extraction & structuring
+├── paddle_ocr_rawtext → Python script for text extraction
+├── OCR_LLMS → Python script for structuring
 ├── data/  
 │   ├── input/ → PDF catalogues  
 │   └── output/ → Excel result files  
