@@ -101,6 +101,16 @@ vision-api-art-catalogue-extraction/
 │   └── output/ → Excel result files  
 └── docs/ → Thesis and methodology info  
 
+## 📁 Folder Structure OpenAI API 
+
+vision_api_code/  
+├── main.py                → Main script to run the extraction  
+├── requirements.txt       → Python dependencies  
+│
+├── pdfs/                  → Input PDF catalogues  
+├── images/                → Converted images from PDFs  
+├── output/                → Extracted Excel files  
+
 ---
 
 ## 🧪 How to Run It
